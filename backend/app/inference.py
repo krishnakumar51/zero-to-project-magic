@@ -6,10 +6,18 @@ Handles ONNX model loading and inference
 
 import cv2
 import numpy as np
-import onnxruntime as ort
 from typing import List, Dict, Any, Tuple
 import time
 import asyncio
+
+# Import onnxruntime conditionally to handle import failures
+try:
+    import onnxruntime as ort
+    ONNX_AVAILABLE = True
+except ImportError as e:
+    print(f"ONNX Runtime not available: {e}")
+    ort = None
+    ONNX_AVAILABLE = False
 
 class ObjectDetector:
     def __init__(self, model_path: str = "/app/models/yolov8n.onnx"):
@@ -40,6 +48,11 @@ class ObjectDetector:
     def _load_model(self):
         """Load ONNX model"""
         try:
+            if not ONNX_AVAILABLE:
+                print("ONNX Runtime not available, using mock detection mode")
+                self.session = None
+                return
+                
             providers = ['CPUExecutionProvider']
             
             # Try to use GPU if available

@@ -11,7 +11,11 @@ RUN apt-get update && apt-get install -y \
     libgomp1 \
     libglib2.0-0 \
     wget \
+    curl \
     && rm -rf /var/lib/apt/lists/*
+
+# Fix executable stack issue for ONNX Runtime
+RUN echo 'kernel.exec-shield = 0' >> /etc/sysctl.conf || true
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
