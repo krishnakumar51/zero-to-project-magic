@@ -12,7 +12,9 @@ export const useObjectDetection = (mode: DetectionMode) => {
   useEffect(() => {
     if (mode === 'wasm') {
       // Initialize WASM worker for on-device detection
-      workerRef.current = new Worker('/src/workers/detectionWorker.js');
+      workerRef.current = new Worker(new URL('../workers/yoloWorker.ts', import.meta.url), {
+        type: 'module'
+      });
       workerRef.current.onmessage = (event) => {
         const { detections: newDetections, processingTime } = event.data;
         setDetections(newDetections);
@@ -49,7 +51,8 @@ export const useObjectDetection = (mode: DetectionMode) => {
         imageData: imageData.data,
         width: canvas.width,
         height: canvas.height,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        frameId: Date.now()
       });
     } else if (mode === 'server') {
       // Send frame to server for inference
